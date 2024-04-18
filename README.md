@@ -11,7 +11,7 @@ Add ```src``` folder to Matlab path.
 - Forouhi-Bloomer model: $n(\lambda) = n_0 + \sum_{j=1,2,3,4} \frac{B_j\cdot (E(\lambda)-E_j) + C_j}{(E(\lambda)-E_j)^2 + G_j^2} + \frac{f_j\cdot (E(\lambda)-E_g)^2\cdot \delta(E(\lambda)-E_g)}{(E(\lambda)-E_j)^2+G_j^2}\cdot i$, being $\delta$ the step function.
 - Linear gradient model: $n_j(\lambda)= \frac{n_2-n_1}{N-1}\cdot j$, being $N$ the number of sublayers.
 - DBR: Distributed Bragg Reflector with N periods.
-- File: Load $n% and $k$ data from ```mat``` file.
+- File: Load $n$ and $k$ data from ```mat``` file.
 
 ## **Usage**:
 SCOptC function call takes the following form:
