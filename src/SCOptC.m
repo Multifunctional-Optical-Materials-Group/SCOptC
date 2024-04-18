@@ -300,6 +300,10 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
     N6500K = N6500K.';
 
     IPCE     = squeeze(Abs(:,:,active));
+    IPCE_SQ =(wl<(1239.8/foptions.SQgap)).*ones(1,length(wl));
+    Jsc_SQ = trapz(wl, qe.*IPCE_SQ.'.*Nam15)/1e4*1e3;
+    results.IPCE_SQ = IPCE_SQ;
+    results.Jsc_SQ = Jsc_SQ;
     Jsc      = trapz(wl, qe.*IPCE.*Nam15)/1e4*1e3;
     results.Jsc_total = sum(Jsc);
     results.IPCE = IPCE;
