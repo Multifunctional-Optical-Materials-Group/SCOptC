@@ -299,12 +299,14 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
     N6500K = Iam15.*wl*1e-9/h/c;
     N6500K = N6500K.';
 
-    IPCE     = sum(Abs(:,:,active),3);
+    IPCE     = squeeze(Abs(:,:,active));
     Jsc      = trapz(wl, qe.*IPCE.*Nam15)/1e4*1e3;
+    results.Jsc_total = sum(Jsc);
     results.IPCE = IPCE;
     results.Jsc = Jsc;
-    IPCE_loss     = sum(Abs(:,:,~active),3);
+    IPCE_loss     = squeeze(Abs(:,:,~active));
     Jsc_loss      = trapz(wl, qe.*IPCE_loss.*Nam15)/1e4*1e3;
+    results.Jsc_loss_total = sum(Jsc_loss);
     results.IPCE_loss = IPCE_loss;
     results.Jsc_loss = Jsc_loss;
 
