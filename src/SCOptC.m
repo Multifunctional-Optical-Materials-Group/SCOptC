@@ -8,7 +8,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function [models_out,N,D,results,foptions_out] = ReTraC(wl,theta,models,foptions)
+function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions)
     
     %% UltimaRI
     
