@@ -29,8 +29,8 @@ SCOptC function call takes the following form:
 ### Models struct:
 All the required information of each layer is stored inside a ```model``` struct. We make a distinction between known layers and unknown layers.
   - Known layers:
-    - Forouhi-Bloomer model (max. 4 oscillators):
-      - ```model.type = "Fh-1"``` or ```model.type = "Fh-2"``` or ```model.type = "Fh-3"``` or ```model.type = "Fh-4"```
+    - Forouhi-Bloomer model:
+      - ```model.type = "Fh-N"```
       - ```model.Eg``` Bandgap in Ev
       - ```model.n0``` low frequency refractive index
       - ```model.fi``` fi parameter (length should be equal to the number of oscillators)
