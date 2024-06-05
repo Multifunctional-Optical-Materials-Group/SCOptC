@@ -329,6 +329,24 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
     CIE = interp1(wl_CIE,CIE1931,wl);
     Tt = 0.5*(Tt_P+Tt_S);
 
+    Sun_Tt = Nam15.*Tt;
+
+    % Build CRI data
+    if wl(1)>380
+        aux_wl = [380 wl];
+        aux_Tt = [Sun_Tt(1); Sun_Tt];
+    elseif wl(end)<780
+        aux_wl = [wl 780];
+        aux_Tt = [Sun_Tt ;Sun_Tt(end)];
+    else
+        aux_wl = wl;
+        aux_Tt = Sun_Tt;
+    end
+
+    [~,~,~,~,~,~,Ra,~] =pspectro([aux_wl.' ,aux_Tt]);
+
+    results.CRI = Ra/100;
+
     AVT = trapz(wl,CIE.'.*Nam15.*Tt,1)./trapz(wl,CIE.'.*Nam15); % Average visible transmission
     AT = trapz(wl,Nam15.*Tt,1)./trapz(wl,Nam15); % Average visible transmission
     results.AVT = AVT;
