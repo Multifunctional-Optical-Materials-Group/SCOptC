@@ -281,13 +281,17 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
         z = [z , z(end)+1:z(end)+200];
     end
 
-    [Rt_S,Rt_P,Tt_S,Tt_P,E2_s,E2_p,Pabs,Abs] = f_plot_RTc(N, D, lcoher, wl, theta.values,z,active,foptions);
+    [Rt_S,Rt_P,Tt_S,Tt_P,E2_s,E2_p,Pabs,Pabs_s,Pabs_p,Abs,Abs_s,Abs_p] = f_plot_RTc(N, D, lcoher, wl, theta.values,z,active,foptions);
     results.Rt_S = Rt_S;
     results.Rt_P = Rt_P;
     results.Tt_S = Tt_S;
     results.Tt_P = Tt_P;
     results.Pabs = Pabs;
+    results.Pabs_s = Pabs_s;
+    results.Pabs_p = Pabs_p;
     results.Abs = Abs;
+    results.Abs_s = Abs_s;
+    results.Abs_p = Abs_p;
     results.z = z;
     results.active = active;
 
@@ -383,6 +387,8 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
 %     results.AT_6500K = AT_6500K;
 
     results.E2 = 0.5*(E2_s+E2_p);
+    results.E2_s = E2_s;
+    results.E2_p = E2_p;
 
 
 end

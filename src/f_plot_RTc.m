@@ -8,7 +8,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function [Rt_S,Rt_P,Tt_S,Tt_P,E2_s,E2_p,Pabs,Abs] = f_plot_RTc(N, D, lcoher, wl, theta,z,active,foptions)
+function [Rt_S,Rt_P,Tt_S,Tt_P,E2_s,E2_p,Pabs,Pabs_s,Pabs_p,Abs,Abs_s,Abs_p] = f_plot_RTc(N, D, lcoher, wl, theta,z,active,foptions)
     
    
 
@@ -24,12 +24,14 @@ function [Rt_S,Rt_P,Tt_S,Tt_P,E2_s,E2_p,Pabs,Abs] = f_plot_RTc(N, D, lcoher, wl,
     Pabs_p = zeros(length(wl),length(theta),length(z));
 
     Abs = zeros(length(wl),length(theta),length(D));
+    Abs_s = zeros(length(wl),length(theta),length(D));
+    Abs_p = zeros(length(wl),length(theta),length(D));
 
 
     for k1=1:length(theta)
         for k2=1:length(wl)
             
-            [Rt_S(k2,k1), Rt_P(k2,k1), Tt_S(k2,k1), Tt_P(k2,k1), E2_s(k2,k1,:), E2_p(k2,k1,:), Pabs_s(k2,k1,:), Pabs_p(k2,k1,:)] = RTF_Abeles_F(N(k2,:), D', wl(k2),theta(k1)*pi/180,z,lcoher,30);
+            [Rt_S(k2,k1), Rt_P(k2,k1), Tt_S(k2,k1), Tt_P(k2,k1), E2_s(k2,k1,:), E2_p(k2,k1,:), Pabs_s(k2,k1,:), Pabs_p(k2,k1,:)] = RTF_Abeles_F(N(k2,:), D',[], wl(k2),theta(k1)*pi/180,z,lcoher,30);
             
         end
 
@@ -45,6 +47,8 @@ function [Rt_S,Rt_P,Tt_S,Tt_P,E2_s,E2_p,Pabs,Abs] = f_plot_RTc(N, D, lcoher, wl,
             [~,z1] = min(abs(h(w)-z));
             [~,z2] = min(abs(h(w+1)-z));
             Abs(:,:,w) = trapz(z(z1:z2),Pabs(:,:,z1:z2),3);
+            Abs_s(:,:,w) = trapz(z(z1:z2),Pabs_s(:,:,z1:z2),3);
+            Abs_p(:,:,w) = trapz(z(z1:z2),Pabs_p(:,:,z1:z2),3);
         end
     end
 
