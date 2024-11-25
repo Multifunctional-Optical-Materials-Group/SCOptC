@@ -120,7 +120,22 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
                         active(models{k2}.index) = 1;
                     end
                 end
-
+            case "Lnz-N"  % 5 + 1 par
+                auxind = auxind+1;
+                models{k2}.index = auxind;
+                E0 = models{k2}.E0;
+                n0 = models{k2}.n0;
+                Ep = models{k2}.Ep;
+                g = models{k2}.g;
+                N(:,models{k2}.index) = f_nk_lorentz(wl, n0, E0, Ep, g);
+                if k2~=1 && k2~=n_layers
+                    D(models{k2}.index) = models{k2}.D/1000;
+                    if models{k2}.active == "false"
+                        active(models{k2}.index) = 0;
+                    else
+                        active(models{k2}.index) = 1;
+                    end
+                end
             case "eFh-N"  % 5 + 1 par
                 auxind = auxind+1;
                 models{k2}.index = auxind;
@@ -253,7 +268,7 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
     end
     active = active>0;
     
-    z = [];
+    z = -200:foptions.zstep:0;
     if isempty(foptions.zstep) == false
         h = [0 ; cumsum(D)];
         for ww = 1 : length(D)
@@ -263,6 +278,7 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
                 z = [z , linspace(h(ww),h(ww+1),20)];
             end
         end
+        z = [z , z(end)+1:z(end)+200];
     end
 
     [Rt_S,Rt_P,Tt_S,Tt_P,E2_s,E2_p,Pabs,Abs] = f_plot_RTc(N, D, lcoher, wl, theta.values,z,active,foptions);
@@ -288,15 +304,16 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
     Iam15 = interp1(AM15(:,1), Irr_n, wl);
     Nam15 = Iam15.*wl*1e-9/h/c;
     Nam15 = Nam15.';
+    Iam15 = Iam15.';
 
-    Irr_n = VarName540./trapz(wl_LED, VarName540)*4; % 4 W/m2
-    Iam15 = interp1(wl_LED, Irr_n, wl);
-    N3000K = Iam15.*wl*1e-9/h/c;
+    Irr_led1 = VarName540./trapz(wl_LED, VarName540)*4; % 4 W/m2
+    Iled1 = interp1(wl_LED, Irr_led1, wl);
+    N3000K = Iled1.*wl*1e-9/h/c;
     N3000K = N3000K.';
 
-    Irr_n = VarName1412./trapz(wl_LED, VarName1412)*4; % 4 W/m2
-    Iam15 = interp1(wl_LED, Irr_n, wl);
-    N6500K = Iam15.*wl*1e-9/h/c;
+    Irr_led2 = VarName1412./trapz(wl_LED, VarName1412)*4; % 4 W/m2
+    Iled2= interp1(wl_LED, Irr_led2, wl);
+    N6500K = Iled2.*wl*1e-9/h/c;
     N6500K = N6500K.';
 
     IPCE     = squeeze(Abs(:,:,active));
@@ -314,53 +331,56 @@ function [models_out,N,D,results,foptions_out] = SCOptC(wl,theta,models,foptions
     results.IPCE_loss = IPCE_loss;
     results.Jsc_loss = Jsc_loss;
 
-    Jsc_3000K      = trapz(wl, qe.*IPCE.*N3000K)/1e4*1e3;
-    results.Jsc_3000K = Jsc_3000K;
-    Jsc_loss_3000K      = trapz(wl, qe.*IPCE_loss.*N3000K)/1e4*1e3;
-    results.Jsc_loss_3000K = Jsc_loss_3000K;
-
-    Jsc_6500K      = trapz(wl, qe.*IPCE.*N6500K)/1e4*1e3;
-    results.Jsc_6500K = Jsc_6500K;
-    Jsc_loss_6500K      = trapz(wl, qe.*IPCE_loss.*N6500K)/1e4*1e3;
-    results.Jsc_loss_6500K = Jsc_loss_6500K;
+%     Jsc_3000K      = trapz(wl, qe.*IPCE.*N3000K)/1e4*1e3;
+%     results.Jsc_3000K = Jsc_3000K;
+%     Jsc_loss_3000K      = trapz(wl, qe.*IPCE_loss.*N3000K)/1e4*1e3;
+%     results.Jsc_loss_3000K = Jsc_loss_3000K;
+% 
+%     Jsc_6500K      = trapz(wl, qe.*IPCE.*N6500K)/1e4*1e3;
+%     results.Jsc_6500K = Jsc_6500K;
+%     Jsc_loss_6500K      = trapz(wl, qe.*IPCE_loss.*N6500K)/1e4*1e3;
+%     results.Jsc_loss_6500K = Jsc_loss_6500K;
 
     load CIE_photopic.mat CIE1931 wl_CIE
 
     CIE = interp1(wl_CIE,CIE1931,wl);
     Tt = 0.5*(Tt_P+Tt_S);
 
-    Sun_Tt = Nam15.*Tt;
+    Sun_Tt = Iam15.*Tt;
+
+    aux_wl = wl;
+    aux_Tt = Sun_Tt;
 
     % Build CRI data
-    if wl(1)>380
-        aux_wl = [380 wl];
-        aux_Tt = [Sun_Tt(1); Sun_Tt];
-    elseif wl(end)<780
-        aux_wl = [wl 780];
-        aux_Tt = [Sun_Tt ;Sun_Tt(end)];
-    else
-        aux_wl = wl;
-        aux_Tt = Sun_Tt;
+    if wl(1)<380 || wl(end)>780
+        aux_wl = (380:780).';
+        aux_Tt = interp1(wl,Sun_Tt,aux_wl);
+        aux_Iam15 = interp1(wl,Iam15,aux_wl);
     end
 
-    [~,~,~,~,~,~,Ra,~] =pspectro([aux_wl.' ,aux_Tt]);
+    
+
+    [~,~,~,~,~,~,Ra,~] =pspectro([aux_wl ,aux_Tt]);
+
+    [Ra_Sun,~] =getcri1995([aux_wl ,aux_Tt],[aux_wl ,aux_Iam15],aux_wl.');
 
     results.CRI = Ra/100;
+    results.CRI_Sun = Ra_Sun/100;
 
-    AVT = trapz(wl,CIE.'.*Nam15.*Tt,1)./trapz(wl,CIE.'.*Nam15); % Average visible transmission
-    AT = trapz(wl,Nam15.*Tt,1)./trapz(wl,Nam15); % Average visible transmission
+    AVT = trapz(wl,CIE.'.*Iam15.*Tt,1)./trapz(wl,CIE.'.*Iam15); % Average visible transmission
+    AT = trapz(wl,Iam15.*Tt,1)./trapz(wl,Iam15); % Average visible transmission
     results.AVT = AVT;
     results.AT = AT;
 
-    AVT_3000K = trapz(wl,CIE.'.*N3000K.*Tt,1)./trapz(wl,CIE.'.*N3000K); % Average visible transmission
-    AT_3000K = trapz(wl,N3000K.*Tt,1)./trapz(wl,N3000K); % Average visible transmission
-    results.AVT_3000K = AVT_3000K;
-    results.AT_3000K = AT_3000K;
-
-    AVT_6500K = trapz(wl,CIE.'.*N6500K.*Tt,1)./trapz(wl,CIE.'.*N6500K); % Average visible transmission
-    AT_6500K = trapz(wl,N6500K.*Tt,1)./trapz(wl,N6500K); % Average visible transmission
-    results.AVT_6500K = AVT_6500K;
-    results.AT_6500K = AT_6500K;
+%     AVT_3000K = trapz(wl,CIE.'.*N3000K.*Tt,1)./trapz(wl,CIE.'.*N3000K); % Average visible transmission
+%     AT_3000K = trapz(wl,N3000K.*Tt,1)./trapz(wl,N3000K); % Average visible transmission
+%     results.AVT_3000K = AVT_3000K;
+%     results.AT_3000K = AT_3000K;
+% 
+%     AVT_6500K = trapz(wl,CIE.'.*N6500K.*Tt,1)./trapz(wl,CIE.'.*N6500K); % Average visible transmission
+%     AT_6500K = trapz(wl,N6500K.*Tt,1)./trapz(wl,N6500K); % Average visible transmission
+%     results.AVT_6500K = AVT_6500K;
+%     results.AT_6500K = AT_6500K;
 
     results.E2 = 0.5*(E2_s+E2_p);
 
